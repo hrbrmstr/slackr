@@ -8,12 +8,13 @@
 #' environment variable. You can override or just specify these values directly instead,
 #' but it's probably better to call [slackr_setup()] first.
 #' @importFrom withr local_options
-#' @param ... expressions to be sent to Slack
-#' @param channel which channel to post the message to (chr)
-#' @param username what user should the bot be named as (chr)
-#' @param icon_emoji what emoji to use (chr) `""` will mean use the default
-#' @param token A Slack token (either a user token or a bot user token)
-#' @param bot_user_oauth_token Deprecated. A Slack bot user OAuth token
+#' @param ... expressions to be sent to Slack.
+#' @param channel Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See the \href{https://api.slack.com/methods/chat.postMessage#channels}{chat.postMessage endpoint documentation} for details.
+#' @param username what user should the bot be named as (chr).
+#' @param icon_emoji what emoji to use (chr) `""` will mean use the default.
+#' @param token Authentication token bearing required scopes. Tokens should be passed as an HTTP Authorization header or alternatively, as a POST parameter.
+#' @param thread_ts Provide another message's ts value to make this message a reply. Avoid using a reply's ts value; use its parent instead.
+#' @param reply_broadcast Used in conjunction with thread_ts and indicates whether reply should be made visible to everyone in the channel or conversation. Defaults to FALSE.
 #' @return the response (invisibly)
 #' @note You need a <https://www.slack.com> account and will also need to
 #'       set up an API token <https://api.slack.com/>
@@ -35,9 +36,9 @@ slackr <- function(...,
                    username = Sys.getenv("SLACK_USERNAME"),
                    icon_emoji = Sys.getenv("SLACK_ICON_EMOJI"),
                    token = Sys.getenv("SLACK_TOKEN"),
-                   bot_user_oauth_token = Sys.getenv("SLACK_BOT_USER_OAUTH_TOKEN")) {
+                   thread_ts = NULL,
+                   reply_broadcast = FALSE) {
   local_options(list(cli.num_colors = 1))
-  token <- check_tokens(token, bot_user_oauth_token)
 
   warn_for_args(
     token,
@@ -119,7 +120,9 @@ slackr <- function(...,
         username = username,
         emoji = icon_emoji,
         txt = sprintf("```%s```", output),
-        link_names = 1
+        link_names = 1,
+        thread_ts = thread_ts,
+        reply_broadcast = reply_broadcast
       )
   }
 
@@ -130,13 +133,14 @@ slackr <- function(...,
 #'
 #' @param txt text message to send to Slack. If a character vector of length > 1
 #'        is passed in, they will be combined and separated by newlines.
-#' @param channel which channel to post the message to (chr)
-#' @param username what user should the bot be named as (chr)
-#' @param icon_emoji what emoji to use (chr) `""` will mean use the default
-#' @param token A Slack token (either a user token or a bot user token)
-#' @param bot_user_oauth_token Deprecated. A Slack bot user OAuth token
-#' @return the response (invisibly)
+#' @param channel Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See the \href{https://api.slack.com/methods/chat.postMessage#channels}{chat.postMessage endpoint documentation} for details.
+#' @param username what user should the bot be named as (chr).
+#' @param icon_emoji what emoji to use (chr) `""` will mean use the default.
+#' @param token Authentication token bearing required scopes. Tokens should be passed as an HTTP Authorization header or alternatively, as a POST parameter.
+#' @param thread_ts Provide another message's ts value to make this message a reply. Avoid using a reply's ts value; use its parent instead.
+#' @param reply_broadcast Used in conjunction with thread_ts and indicates whether reply should be made visible to everyone in the channel or conversation. Defaults to FALSE.
 #' @param ... other arguments passed to the Slack API `chat.postMessage` call
+#' @return the response (invisibly)
 #' @note You need a <https://www.slack.com> account and will also need to
 #'       setup an API token <https://api.slack.com/>
 #'       Also, you can pass in `add_user=TRUE` as part of the `...`
@@ -155,10 +159,9 @@ slackr_msg <- function(txt = "",
                        username = Sys.getenv("SLACK_USERNAME"),
                        icon_emoji = Sys.getenv("SLACK_ICON_EMOJI"),
                        token = Sys.getenv("SLACK_TOKEN"),
-                       bot_user_oauth_token = Sys.getenv("SLACK_BOT_USER_OAUTH_TOKEN"),
+                       thread_ts = NULL,
+                       reply_broadcast = FALSE,
                        ...) {
-  token <- check_tokens(token, bot_user_oauth_token)
-
   warn_for_args(
     token,
     username = username,
@@ -175,6 +178,8 @@ slackr_msg <- function(txt = "",
       token = token,
       username = username,
       link_names = 1,
+      thread_ts = thread_ts,
+      reply_broadcast = reply_broadcast,
       ...
     )
 

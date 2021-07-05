@@ -1,3 +1,17 @@
+# slackr 3.0.0
+
+Lots of breaking changes in this release:
+* `bot_user_oauth_token` has been removed entirely in favor of `token`
+* `slackr_history` now has `message_count` as it's first argument
+* Adding the capability to pass the `thread_ts` parameter to all `slackr_*` functions (i.e. allowing you to reply to a message in a thread)
+* Adding `reply_broadcast` capability in `slackr` and `slackr_msg`
+* Adding `title` and `initial_comment` parameters for all functions relying on the `files.upload` endpoint (basically everything except for `slackr`, `slackr_bot`, `slackr_msg`, `slackr_history`, and `slackr_delete`)
+
+Other changes:
+* Significant improvements to documentation, which now aligns with Slack API descriptions
+* Significant internal overhauls of how the functions call the API
+
+
 # slackr 2.4.0
 
 * Deprecates the `bot_user_oauth_token` argument for `slackr*` functions in favor of `token`
